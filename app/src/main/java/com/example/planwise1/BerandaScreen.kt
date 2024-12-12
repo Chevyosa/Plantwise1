@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.IconButton
@@ -11,6 +12,7 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -22,8 +24,10 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.example.planwise1.viewmodel.PlantsViewModel
+
 @Composable
-fun Beranda(navHostController: NavHostController) {
+fun Beranda(navHostController: NavHostController, viewModel: PlantsViewModel) {
     var plant by remember { mutableStateOf(TextFieldValue("")) }
     var selectedMenu by remember { mutableStateOf("home") }
     var isPressed by remember { mutableStateOf(false) }
@@ -52,7 +56,13 @@ fun Beranda(navHostController: NavHostController) {
         R.drawable.group3
     )
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    val speciesList by viewModel.speciesList.observeAsState(emptyList())
+
+    LaunchedEffect(key1 = Unit) {
+        viewModel.getSpeciesList()
+    }
+
+    Box(modifier = Modifier.fillMaxSize().systemBarsPadding()) {
         // Konten utama menggunakan LazyColumn
         LazyColumn(
             modifier = Modifier
@@ -364,9 +374,14 @@ fun Beranda(navHostController: NavHostController) {
                     }
                 }
             }
+        }
 
-
-
+        LazyColumn {
+            items(speciesList.take(5)) { item ->
+                key(item.id) {
+                    Text(item.commonName?: "No Data")
+                }
+            }
         }
 
         // Bottom Navigation
